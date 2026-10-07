@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>粒刻校园 · 经营决策方案汇报 | 管理学课程作业</title>
+<style>
+:root{
+  --blue:#165DFF;--blue-d:#0E4FD8;--blue-l:#2F7BFF;--blue-xl:#7FB0FF;
+  --navy:#0B2E6E;--cyan:#12A8C8;--cyan-l:#39D6C9;
+  --ink:#1B2A41;--slate:#5B6B84;--slate-l:#8C9CB5;
+  --line:#E2EDFF;--bg:#F4F8FF;--card:#FFFFFF;
+  --soft:#EAF2FF;--soft-2:#F2F7FF;--green:#16B386;--orange:#F59E2B;--red:#F05A6E;
+  --r:18px;--sh:0 12px 34px rgba(22,93,255,.09);--sh2:0 22px 54px rgba(14,79,216,.16);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink);background:#0B2E6E;overflow:hidden;line-height:1.7;-webkit-font-smoothing:antialiased}
+ul{list-style:none}
+b{font-weight:700}
+::selection{background:var(--blue);color:#fff}
+
+/* ===== 舞台与缩放 ===== */
+#stage{position:fixed;left:50%;top:50%;width:1280px;height:720px;transform-origin:center center}
+.slide{position:absolute;inset:0;background:var(--bg);border-radius:22px;overflow:hidden;opacity:0;visibility:hidden;transform:translateY(26px);transition:opacity .45s cubic-bezier(.2,.7,.2,1),transform .45s cubic-bezier(.2,.7,.2,1),visibility .45s;box-shadow:0 40px 90px rgba(4,20,55,.55)}
+.slide.active{opacity:1;visibility:visible;transform:none}
+.pad{position:absolute;inset:0;padding:52px 64px 64px;display:flex;flex-direction:column}
+
+/* ===== 顶部进度条 ===== */
+#pbar{position:fixed;top:0;left:0;height:4px;width:0;background:linear-gradient(90deg,var(--blue),var(--cyan-l));z-index:99;transition:width .4s ease;border-radius:0 4px 4px 0}
+
+/* ===== 通用版式 ===== */
+.kidx{font-size:13px;font-weight:800;letter-spacing:3.5px;color:var(--blue);font-family:Consolas,"Courier New",monospace}
+.sh{margin-bottom:22px}
+.sh h2{font-size:32px;font-weight:800;color:var(--navy);margin:6px 0 4px;letter-spacing:.5px}
+.sh p{color:var(--slate);font-size:15px}
+.grad{background:linear-gradient(92deg,var(--blue),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:4px 12px;border-radius:99px;background:var(--soft);color:var(--blue)}
+.foot{position:absolute;left:64px;right:64px;bottom:24px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--slate-l)}
+.foot .fl{display:flex;align-items:center;gap:8px}
+.foot .dot{width:6px;height:6px;border-radius:50%;background:var(--blue)}
+
+/* ===== 封面 ===== */
+.s-cover{background:linear-gradient(160deg,#F7FAFF 0%,#EAF2FF 55%,#DDEAFF 100%)}
+.s-cover::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(22,93,255,.08) 1.5px,transparent 1.5px);background-size:34px 34px}
+.cv{position:relative;display:grid;grid-template-columns:1.05fr .95fr;gap:44px;height:100%;align-items:center;padding:0 72px}
+.hbadge{display:inline-flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--line);color:var(--blue);font-size:13px;font-weight:700;padding:7px 16px;border-radius:99px;box-shadow:var(--sh)}
+.hbadge .dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:blink 1.6s infinite}
+@keyframes blink{0%{box-shadow:0 0 0 0 rgba(22,179,134,.5)}70%{box-shadow:0 0 0 9px rgba(22,179,134,0)}100%{box-shadow:0 0 0 0 rgba(22,179,134,0)}}
+.cv h1{font-size:56px;font-weight:800;line-height:1.2;margin:20px 0 4px;color:var(--navy);letter-spacing:1px}
+.cv .hsub2{font-size:21px;font-weight:800;color:var(--blue);margin-top:6px}
+.cv .hdesc{color:var(--slate);font-size:15px;margin-top:16px;max-width:520px}
+.cv .hdesc b{color:var(--navy)}
+.cmeta{display:flex;gap:10px;margin-top:26px;flex-wrap:wrap}
+.cmeta .m{background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 16px;font-size:13px;color:var(--slate);box-shadow:var(--sh)}
+.cmeta .m b{color:var(--navy)}
+/* 封面右侧：方案评分预览卡 */
+.preview{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--sh2);padding:26px 28px;position:relative;animation:bob 6s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.preview .pbar2{background:#F2F7FF;border-bottom:1px solid var(--line);margin:-26px -28px 20px;padding:12px 20px;display:flex;align-items:center;gap:7px;border-radius:22px 22px 0 0}
+.preview .pbar2 i{width:10px;height:10px;border-radius:50%;display:block}
+.preview .pbar2 .u{margin-left:10px;background:#fff;border:1px solid var(--line);border-radius:7px;padding:2px 12px;font-size:11px;color:var(--slate-l);flex:1}
+.preview h4{font-size:15px;color:var(--navy);margin-bottom:2px}
+.preview .ps{font-size:12px;color:var(--slate-l);margin-bottom:16px}
+.prow{display:grid;grid-template-columns:96px 1fr 52px;gap:10px;align-items:center;margin-bottom:13px}
+.prow .pl{font-size:13px;color:var(--slate)}
+.prow .pl b{color:var(--navy)}
+.ptrack{height:14px;background:#EEF4FF;border-radius:99px;overflow:hidden}
+.pfill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blue-xl),var(--blue));width:0;transition:width 1.1s cubic-bezier(.2,.8,.2,1) .3s}
+.prow.win .pfill{background:linear-gradient(90deg,var(--cyan-l),var(--cyan))}
+.prow .pv{font-size:13.5px;font-weight:800;color:var(--navy);text-align:right}
+.prow.win .pv{color:var(--cyan)}
+.pwinner{display:flex;align-items:center;gap:10px;margin-top:16px;background:linear-gradient(135deg,#EBFAF6,#EAF2FF);border:1px solid #C9EFE3;border-radius:13px;padding:11px 15px;font-size:13px;color:var(--slate)}
+.pwinner b{color:var(--green)}
+.floatchip{position:absolute;background:#fff;border:1px solid var(--line);border-radius:13px;padding:8px 14px;box-shadow:var(--sh);font-size:12.5px;font-weight:700;color:var(--navy);animation:bob 5s ease-in-out infinite}
+.fc1{top:-16px;left:-26px;animation-delay:.5s;color:var(--blue)}
+.fc2{bottom:38%;right:-30px;animation-delay:1.3s;color:var(--cyan)}
+.fc3{bottom:-16px;left:12%;animation-delay:2s;color:var(--orange)}
+
+/* ===== 深色数据页 ===== */
+.dark{background:linear-gradient(180deg,var(--navy) 0%,#10398F 100%);color:#fff}
+.dark::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.07) 1.5px,transparent 1.5px);background-size:34px 34px;opacity:.6}
+.dark .pad{position:relative}
+.dark .kidx{color:var(--cyan-l)}
+.dark .sh h2{color:#fff}
+.dark .sh p{color:rgba(255,255,255,.65)}
+.dark .foot{color:rgba(255,255,255,.45)}
+.dark .foot .dot{background:var(--cyan-l)}
+
+/* ===== KPI 组 ===== */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:15px;padding:18px 18px 16px;position:relative;overflow:hidden}
+.kpi::after{content:"";position:absolute;right:-24px;top:-24px;width:70px;height:70px;border-radius:50%;background:var(--soft)}
+.kpi .kn{font-size:30px;font-weight:800;color:var(--navy);line-height:1.1;position:relative}
+.kpi .kn small{font-size:15px;color:var(--blue)}
+.kpi .kl{font-size:12.5px;color:var(--slate);margin-top:4px;position:relative}
+
+/* ===== 背景页 ===== */
+.bgrid{display:grid;grid-template-columns:1.05fr .95fr;gap:20px;flex:1;min-height:0}
+.bcol{display:flex;flex-direction:column;gap:14px;min-height:0}
+.bcard{background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:20px 22px}
+.bcard h3{font-size:16px;color:var(--navy);display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.bcard h3 .ic{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--blue-l),var(--blue-d));display:grid;place-items:center;flex-shrink:0}
+.bcard h3 .ic svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2.2}
+.bcard h3 .ic.cy{background:linear-gradient(135deg,var(--cyan-l),var(--cyan))}
+.bcard h3 .ic.or{background:linear-gradient(135deg,#FFB35C,var(--orange))}
+.bcard p{font-size:13.5px;color:var(--slate)}
+.bcard p b{color:var(--navy)}
+.chk li{display:flex;gap:9px;font-size:13.5px;color:var(--slate);padding:5px 0;align-items:flex-start}
+.chk li::before{content:"";width:17px;height:17px;border-radius:6px;flex-shrink:0;margin-top:3px;background:var(--soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23165DFF' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center/11px no-repeat}
+.chk.warn li::before{background:#FDF1E7 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F59E2B' stroke-width='3.2' stroke-linecap='round'%3E%3Cpath d='M12 7v7M12 17.5v.5'/%3E%3C/svg%3E") center/11px no-repeat}
+.chk li b{color:var(--navy)}
+
+/* ===== 决策三要素 ===== */
+.dtypes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+.dt{background:#fff;border:1px solid var(--line);border-radius:15px;padding:16px 18px;box-shadow:var(--sh);border-top:4px solid var(--blue)}
+.dt:nth-child(2){border-top-color:var(--cyan)}
+.dt:nth-child(3){border-top-color:var(--orange)}
+.dt .dk{font-size:12px;font-weight:800;letter-spacing:2px;color:var(--slate-l);font-family:Consolas,monospace}
+.dt h4{font-size:17px;color:var(--navy);margin:2px 0 4px}
+.dt p{font-size:12.5px;color:var(--slate)}
+.wrow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:12px}
+.wcell{background:var(--soft-2);border:1px solid var(--line);border-radius:12px;padding:11px 12px;font-size:12px;color:var(--slate)}
+.wcell b{display:block;font-size:13px;color:var(--navy);margin-bottom:2px}
+
+/* ===== PEST ===== */
+.pest{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;flex:1;min-height:0}
+.pcol{background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:18px 18px 14px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.pcol::before{content:"";position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--blue-l),var(--blue-d))}
+.pcol:nth-child(2)::before{background:linear-gradient(90deg,var(--cyan-l),var(--cyan))}
+.pcol:nth-child(3)::before{background:linear-gradient(90deg,#3BD6A5,var(--green))}
+.pcol:nth-child(4)::before{background:linear-gradient(90deg,#FFB35C,var(--orange))}
+.pcol .ph{display:flex;align-items:center;gap:11px;margin-bottom:10px}
+.pcol .pl2{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:20px;font-weight:800;color:#fff;flex-shrink:0;font-family:Consolas,monospace}
+.pcol:nth-child(1) .pl2{background:linear-gradient(135deg,var(--blue-l),var(--blue-d))}
+.pcol:nth-child(2) .pl2{background:linear-gradient(135deg,var(--cyan-l),var(--cyan))}
+.pcol:nth-child(3) .pl2{background:linear-gradient(135deg,#3BD6A5,var(--green))}
+.pcol:nth-child(4) .pl2{background:linear-gradient(135deg,#FFB35C,var(--orange))}
+.pcol h3{font-size:16px;color:var(--navy);line-height:1.3}
+.pcol .pe{font-size:11px;color:var(--slate-l);font-weight:600;letter-spacing:.5px}
+.pcol li{font-size:12.8px;color:var(--slate);padding:6px 0 6px 15px;position:relative;border-top:1px dashed var(--line)}
+.pcol li::before{content:"";position:absolute;left:0;top:13px;width:6px;height:6px;border-radius:2px;background:var(--blue-xl)}
+.pcol:nth-child(2) li::before{background:var(--cyan-l)}
+.pcol:nth-child(3) li::before{background:#3BD6A5}
+.pcol:nth-child(4) li::before{background:#FFB35C}
+.pcol li b{color:var(--navy)}
+.pconcl{margin-top:14px;background:linear-gradient(135deg,var(--soft),#E3F7F5);border:1px solid var(--line);border-radius:13px;padding:11px 18px;font-size:13.5px;color:var(--slate)}
+.pconcl b{color:var(--blue)}
+
+/* ===== 五力模型 ===== */
+.ff{display:grid;grid-template-columns:1fr 1.15fr 1fr;grid-template-rows:1fr 1fr;gap:14px;flex:1;min-height:0}
+.ffc{background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:16px 19px;display:flex;flex-direction:column;justify-content:center}
+.ffc .fh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.ffc h3{font-size:15.5px;color:var(--navy)}
+.lvl{font-size:11.5px;font-weight:800;padding:3px 11px;border-radius:99px;flex-shrink:0}
+.lvl.h{color:#fff;background:linear-gradient(135deg,#FF7E92,var(--red))}
+.lvl.m{color:#fff;background:linear-gradient(135deg,#FFB35C,var(--orange))}
+.lvl.l{color:#fff;background:linear-gradient(135deg,#3BD6A5,var(--green))}
+.ffc p{font-size:12.6px;color:var(--slate)}
+.ffc p b{color:var(--navy)}
+.ffc.center{grid-row:1/3;background:linear-gradient(160deg,var(--navy),#10398F);border:none;color:#fff;box-shadow:var(--sh2);position:relative;overflow:hidden}
+.ffc.center::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.08) 1.5px,transparent 1.5px);background-size:26px 26px}
+.ffc.center h3{color:#fff;font-size:19px}
+.ffc.center p{color:rgba(255,255,255,.75);font-size:13px;position:relative}
+.ffc.center p b{color:var(--cyan-l)}
+.ffc.center .fh{position:relative}
+.ffc.center .lvl{background:rgba(255,255,255,.16);color:#fff;backdrop-filter:blur(4px)}
+.fconcl{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:13px;padding:10px 18px;font-size:13.5px;color:var(--slate);box-shadow:var(--sh)}
+.fconcl b{color:var(--blue)}
+
+/* ===== SWOT ===== */
+.sw{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:14px;flex:1;min-height:0}
+.swc{background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:16px 20px 12px;position:relative;overflow:hidden}
+.swc .sh2{display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.swc .sl{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;font-size:17px;font-weight:800;color:#fff;font-family:Consolas,monospace;flex-shrink:0}
+.swc.s .sl{background:linear-gradient(135deg,var(--blue-l),var(--blue-d))}
+.swc.w .sl{background:linear-gradient(135deg,#FFB35C,var(--orange))}
+.swc.o .sl{background:linear-gradient(135deg,#3BD6A5,var(--green))}
+.swc.t .sl{background:linear-gradient(135deg,#FF7E92,var(--red))}
+.swc h3{font-size:15.5px;color:var(--navy)}
+.swc .se{font-size:11px;color:var(--slate-l);font-weight:600}
+.swc ul{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+.swc li{font-size:12.6px;color:var(--slate);padding:4.5px 0 4.5px 14px;position:relative}
+.swc li::before{content:"";position:absolute;left:0;top:12px;width:6px;height:6px;border-radius:2px}
+.swc.s li::before{background:var(--blue-l)}
+.swc.w li::before{background:#FFB35C}
+.swc.o li::before{background:#3BD6A5}
+.swc.t li::before{background:#FF7E92}
+.swc li b{color:var(--navy)}
+.sstr{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:13px}
+.sst{background:var(--soft-2);border:1px solid var(--line);border-radius:12px;padding:9px 13px;font-size:12px;color:var(--slate)}
+.sst b{color:var(--navy);font-size:12.5px}
+.sst .k{font-family:Consolas,monospace;font-weight:800;color:var(--blue);margin-right:5px}
+
+/* ===== 方案比选表 ===== */
+.cmp{flex:1;min-height:0;display:flex;flex-direction:column}
+.ctable{background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;flex:1;display:flex;flex-direction:column}
+.crow{display:grid;grid-template-columns:1.35fr .9fr .9fr .9fr .9fr .9fr;align-items:center;border-top:1px solid var(--line);flex:1}
+.crow:first-child{border-top:none;background:var(--soft-2)}
+.crow>div{padding:9px 16px;font-size:13px;color:var(--slate)}
+.crow.head>div{font-size:12px;font-weight:800;color:var(--navy);letter-spacing:.3px}
+.crow.head .wn{color:var(--slate-l);font-weight:600;font-size:11px;display:block}
+.crow .opn{font-size:14.5px;font-weight:800;color:var(--navy)}
+.crow .opn small{display:block;font-size:11.5px;color:var(--slate-l);font-weight:500;margin-top:1px}
+.crow .sc{font-weight:700;color:var(--navy);text-align:center}
+.crow .tot{font-size:17px;font-weight:800;color:var(--navy);text-align:center}
+.crow.win{background:linear-gradient(90deg,#EBFAF6,#F2F7FF)}
+.crow.win .tot{color:var(--green);font-size:20px}
+.winbadge{display:inline-block;margin-left:8px;font-size:11px;font-weight:800;color:#fff;background:linear-gradient(135deg,#3BD6A5,var(--green));padding:2px 10px;border-radius:99px;vertical-align:2px}
+.dim .crow:not(.win):not(.head){opacity:.75}
+.cnote{margin-top:12px;font-size:12.5px;color:var(--slate-l)}
+.cnote b{color:var(--blue)}
+
+/* ===== 最终决策 ===== */
+.dgrid{display:grid;grid-template-columns:1.05fr .95fr;gap:20px;flex:1;min-height:0}
+.decision-hero{background:linear-gradient(160deg,var(--navy),#10398F);border-radius:var(--r);box-shadow:var(--sh2);color:#fff;padding:30px 32px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center}
+.decision-hero::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.08) 1.5px,transparent 1.5px);background-size:28px 28px}
+.decision-hero .dt2{font-size:12.5px;font-weight:800;letter-spacing:3px;color:var(--cyan-l);font-family:Consolas,monospace;position:relative}
+.decision-hero h3{font-size:31px;font-weight:800;line-height:1.35;margin:10px 0 8px;position:relative}
+.decision-hero h3 .hl{color:var(--cyan-l)}
+.decision-hero p{font-size:13.5px;color:rgba(255,255,255,.72);position:relative;max-width:440px}
+.dflow{display:flex;gap:8px;margin-top:20px;position:relative;flex-wrap:wrap}
+.dflow span{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(4px);font-size:12.5px;font-weight:700;padding:7px 14px;border-radius:99px}
+.dflow i{align-self:center;color:var(--cyan-l);font-style:normal;font-weight:800}
+.dside{display:flex;flex-direction:column;gap:13px}
+.dkpi{background:#fff;border:1px solid var(--line);border-radius:15px;box-shadow:var(--sh);padding:15px 20px;display:flex;align-items:center;gap:16px}
+.dkpi .dn{font-size:27px;font-weight:800;color:var(--navy);white-space:nowrap}
+.dkpi .dn small{font-size:14px;color:var(--blue)}
+.dkpi .dl2{font-size:12.5px;color:var(--slate);border-left:1px dashed var(--line);padding-left:16px}
+.dkpi .dl2 b{color:var(--navy)}
+
+/* ===== 财务页 ===== */
+.fgrid{display:grid;grid-template-columns:.95fr 1.05fr;gap:20px;flex:1;min-height:0}
+.fund{background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:22px 24px;display:flex;flex-direction:column}
+.fund h3{font-size:16px;color:var(--navy);margin-bottom:3px}
+.fund .fs{font-size:12px;color:var(--slate-l);margin-bottom:14px}
+.alloc{display:flex;flex-direction:column;gap:9px;flex:1;justify-content:center}
+.arow2{display:grid;grid-template-columns:118px 1fr 62px;gap:10px;align-items:center}
+.arow2 .al{font-size:12.5px;color:var(--slate)}
+.arow2 .av{font-size:13px;font-weight:800;color:var(--navy);text-align:right}
+.atrack{height:13px;background:#EEF4FF;border-radius:99px;overflow:hidden}
+.afill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--blue-xl),var(--blue));width:0;transition:width 1.1s cubic-bezier(.2,.8,.2,1) .3s}
+.afill.c{background:linear-gradient(90deg,var(--cyan-l),var(--cyan))}
+.afill.g{background:linear-gradient(90deg,#3BD6A5,var(--green))}
+.afill.o{background:linear-gradient(90deg,#FFB35C,var(--orange))}
+.afill.r{background:linear-gradient(135deg,#7FB0FF,#5B8DEF)}
+.alloc-total{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px;display:flex;justify-content:space-between;font-size:13px;color:var(--slate)}
+.alloc-total b{color:var(--navy);font-size:15px}
+.goals{display:flex;flex-direction:column;gap:13px}
+.goal{background:#fff;border:1px solid var(--line);border-radius:15px;box-shadow:var(--sh);padding:15px 20px;display:flex;gap:16px;align-items:center;position:relative;overflow:hidden}
+.goal::after{content:"";position:absolute;right:-26px;top:-26px;width:80px;height:80px;border-radius:50%;background:var(--soft)}
+.goal .gy{font-size:13px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--blue-l),var(--blue-d));border-radius:10px;padding:8px 13px;white-space:nowrap;font-family:Consolas,monospace;position:relative;z-index:1}
+.goal:nth-child(2) .gy{background:linear-gradient(135deg,var(--cyan-l),var(--cyan))}
+.goal:nth-child(3) .gy{background:linear-gradient(135deg,#3BD6A5,var(--green))}
+.goal .gt b{display:block;font-size:15px;color:var(--navy)}
+.goal .gt span{font-size:12.5px;color:var(--slate)}
+
+/* ===== 路线图 ===== */
+.tl{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center}
+.tl-track{position:relative;display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
+.tl-track::before{content:"";position:absolute;left:6%;right:6%;top:27px;height:3px;background:linear-gradient(90deg,var(--blue-xl),var(--blue),var(--cyan));border-radius:99px}
+.phase{background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:20px 22px;position:relative;transition:.3s}
+.phase:hover{transform:translateY(-6px);box-shadow:var(--sh2)}
+.phase .pdot{position:absolute;top:18px;left:22px;width:22px;height:22px;border-radius:50%;background:#fff;border:5px solid var(--blue);transform:translateY(-32px)}
+.phase:nth-child(2) .pdot{border-color:var(--cyan)}
+.phase:nth-child(3) .pdot{border-color:var(--green)}
+.phase .pm{display:inline-block;font-size:12px;font-weight:800;color:var(--blue);background:var(--soft);border-radius:99px;padding:3px 12px;font-family:Consolas,monospace;margin-bottom:8px}
+.phase:nth-child(2) .pm{color:var(--cyan);background:#E3F7F9}
+.phase:nth-child(3) .pm{color:var(--green);background:#E6F8F1}
+.phase h3{font-size:17px;color:var(--navy);margin-bottom:8px}
+.phase li{font-size:12.8px;color:var(--slate);padding:4px 0 4px 15px;position:relative}
+.phase li::before{content:"";position:absolute;left:0;top:12px;width:6px;height:6px;border-radius:2px;background:var(--blue-xl)}
+.phase:nth-child(2) li::before{background:var(--cyan-l)}
+.phase:nth-child(3) li::before{background:#3BD6A5}
+.phase li b{color:var(--navy)}
+.gate{margin-top:18px;background:linear-gradient(135deg,var(--soft),#E3F7F5);border:1px solid var(--line);border-radius:13px;padding:11px 18px;font-size:13.5px;color:var(--slate);display:flex;align-items:center;gap:10px}
+.gate b{color:var(--blue)}
+.gate .gic{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--blue-l),var(--blue-d));display:grid;place-items:center;flex-shrink:0}
+.gate .gic svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2.4}
+
+/* ===== 风险页 ===== */
+.risks{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:14px;flex:1;min-height:0}
+.risk{background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:17px 20px;display:flex;gap:15px;align-items:flex-start}
+.risk .ric{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;flex-shrink:0}
+.risk .ric svg{width:21px;height:21px;stroke:#fff;fill:none;stroke-width:2.1}
+.risk:nth-child(1) .ric{background:linear-gradient(135deg,#FF7E92,var(--red))}
+.risk:nth-child(2) .ric{background:linear-gradient(135deg,#FFB35C,var(--orange))}
+.risk:nth-child(3) .ric{background:linear-gradient(135deg,var(--blue-l),var(--blue-d))}
+.risk:nth-child(4) .ric{background:linear-gradient(135deg,var(--cyan-l),var(--cyan))}
+.risk h3{font-size:15px;color:var(--navy);margin-bottom:3px}
+.risk h3 .rt{font-size:11px;font-weight:800;color:var(--red);background:#FDECEF;border-radius:99px;padding:2px 9px;margin-left:7px;vertical-align:1px}
+.risk:nth-child(2) h3 .rt{color:var(--orange);background:#FDF1E7}
+.risk:nth-child(3) h3 .rt{color:var(--blue);background:var(--soft)}
+.risk:nth-child(4) h3 .rt{color:var(--cyan);background:#E3F7F9}
+.risk p{font-size:12.6px;color:var(--slate)}
+.risk p b{color:var(--navy)}
+.risk .ra{margin-top:5px;font-size:12.4px;color:var(--slate);background:var(--soft-2);border-radius:9px;padding:6px 11px}
+.risk .ra b{color:var(--blue)}
+
+/* ===== 结束页 ===== */
+.s-end{background:linear-gradient(160deg,var(--navy) 0%,#10398F 100%);color:#fff}
+.s-end::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.07) 1.5px,transparent 1.5px);background-size:34px 34px}
+.end-in{position:relative;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 100px}
+.end-in .kidx{color:var(--cyan-l)}
+.end-in h2{font-size:44px;font-weight:800;margin:14px 0 10px;line-height:1.35}
+.end-in h2 .hl{color:var(--cyan-l)}
+.end-in p{color:rgba(255,255,255,.7);font-size:15.5px;max-width:640px}
+.etags{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap;justify-content:center}
+.etags span{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(4px);font-size:13px;font-weight:700;padding:9px 20px;border-radius:99px}
+.eteam{margin-top:44px;font-size:14px;color:rgba(255,255,255,.55)}
+.eteam b{color:#fff}
+
+/* ===== 控制条 ===== */
+#ctrl{position:fixed;right:22px;bottom:20px;z-index:99;display:flex;align-items:center;gap:10px}
+#ctrl button{width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);backdrop-filter:blur(8px);color:#fff;font-size:17px;cursor:pointer;transition:.22s;display:grid;place-items:center}
+#ctrl button:hover{background:var(--blue);border-color:var(--blue);transform:translateY(-2px)}
+#cnt{position:fixed;left:24px;bottom:26px;z-index:99;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;font-family:Consolas,monospace;letter-spacing:1px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(8px);padding:6px 14px;border-radius:99px}
+#hint{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:99;color:rgba(255,255,255,.6);font-size:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(8px);padding:5px 15px;border-radius:99px;transition:opacity .6s}
+
+@media print{
+  body{background:#fff;overflow:visible}
+  #ctrl,#cnt,#pbar,#hint{display:none}
+  #stage{position:static;transform:none!important;width:auto;height:auto}
+  .slide{position:relative;opacity:1;visibility:visible;transform:none;border-radius:0;box-shadow:none;page-break-after:always;width:1280px;height:720px}
+}
+</style>
+</head>
+<body>
+
+<div id="pbar"></div>
+<div id="stage">
+
+<!-- ========== 01 封面 ========== -->
+<section class="slide s-cover active">
+  <div class="cv">
+    <div>
+      <span class="hbadge"><span class="dot"></span>管理学课程 · 经营决策方案汇报</span>
+      <h1>粒刻校园<br><span class="grad">生活服务有限公司</span></h1>
+      <div class="hsub2">高校健康餐饮订购与配送 —— 三年核心业务决策</div>
+      <p class="hdesc">基于 <b>PEST · 五力模型 · SWOT</b> 的系统环境分析，在资金 <b>320 万元</b>、可投入 <b>30 人</b> 的资源约束下，从三个备选业务中选定核心业务，并制定"<b>先试点、后扩张</b>"的实施计划。</p>
+      <div class="cmeta">
+        <span class="m">汇报人：<b>李佳彤 · 程静 · 岑哲颖</b></span>
+        <span class="m">专业：<b>数字经济</b></span>
+        <span class="m">决策周期：<b>未来三年</b></span>
+      </div>
+    </div>
+    <div style="position:relative">
+      <div class="floatchip fc1">PEST 宏观环境分析</div>
+      <div class="floatchip fc2">五力模型 · 行业扫描</div>
+      <div class="floatchip fc3">SWOT · 综合研判</div>
+      <div class="preview">
+        <div class="pbar2"><i style="background:#FF5F57"></i><i style="background:#FEBC2E"></i><i style="background:#28C840"></i><span class="u">like-campus.local/方案加权评分</span></div>
+        <h4>三备选方案加权评分</h4>
+        <div class="ps">评分维度：市场需求 · 盈利能力 · 资源匹配 · 风险可控</div>
+        <div class="prow win"><span class="pl"><b>健康餐饮配送</b></span><span class="ptrack"><span class="pfill" data-w="84%"></span></span><span class="pv">4.18</span></div>
+        <div class="prow"><span class="pl">校园智慧零售</span><span class="ptrack"><span class="pfill" data-w="72%"></span></span><span class="pv">3.60</span></div>
+        <div class="prow"><span class="pl">闲置物品循环</span><span class="ptrack"><span class="pfill" data-w="60%"></span></span><span class="pv">2.98</span></div>
+        <div class="pwinner">✔ 综合得分最高：<b>高校健康餐饮订购与配送</b>，与现有能力最贴近</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="fl"><span class="dot"></span>粒刻校园生活服务有限公司</span><span>管理学 · 决策优化专题</span></div>
+</section>
+
+<!-- ========== 02 公司概况与决策背景 ========== -->
+<section class="slide">
+  <div class="pad">
+    <div class="sh">
+      <span class="kidx">01 / BACKGROUND</span>
+      <h2>公司概况与决策背景</h2>
+      <p>多业务机会并存，但资源有限 —— 必须聚焦单一核心业务，集中力量先做稳</p>
+    </div>
+    <div class="bgrid">
+      <div class="bcol">
+        <div class="bcard">
+          <h3><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></span>公司定位</h3>
+          <p>面向<b>高校学生和教职工</b>，提供<b>订购、配送及校园服务点运营</b>的校园生活服务企业。目前处于"多业务机会但资源有限、需聚焦单一核心业务"的关键决策阶段。</p>
+        </div>
+        <div class="bcard" style="flex:1">
+          <h3><span class="ic cy"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>可直接复用的已有能力</h3>
+          <ul class="chk">
+            <li><b>校园运营人员</b> —— 成熟的校内运营与服务点管理经验</li>
+            <li><b>订单系统</b> —— 线上订餐系统现成，无需从零开发</li>
+            <li><b>配送经验</b> —— 校园集中配送的路线与高峰调度经验</li>
+          </ul>
+        </div>
+        <div class="bcard">
+          <h3><span class="ic or"><svg viewBox="0 0 24 24"><path d="M12 7v7M12 17.5v.5M10.3 3.8L2.6 17a2 2 0 001.7 3h15.4a2 2 0 001.7-3L13.7 3.8a2 2 0 00-3.4 0z"/></svg></span>现有短板（约束条件）</h3>
+          <ul class="chk warn">
+            <li><b>缺少食品生产资质</b> —— 不能自建厨房，须与持证供应商合作</li>
+            <li><b>没有大规模实体门店</b> —— 适合轻资产运营模式</li>
+          </ul>
+        </div>
+      </div>
+      <div class="bcol">
+        <div class="kpis" style="grid-template-columns:1fr 1fr">
+          <div class="kpi"><div class="kn">320<small> 万元</small></div><div class="kl">可投入资金（项目 260 万 + 周转 60 万）</div></div>
+          <div class="kpi"><div class="kn">30<small> + 12 人</small></div><div class="kl">项目投入人员 + 后台支持人员</div></div>
+          <div class="kpi"><div class="kn">6<small> 个月内</small></div><div class="kl">决策约束：完成 2 所高校试点</div></div>
+          <div class="kpi"><div class="kn">3<small> 个备选</small></div><div class="kl">健康餐饮 / 智慧零售 / 闲置循环</div></div>
+        </div>
+        <div class="bcard" style="flex:1;display:flex;flex-direction:column;justify-content:center">
+          <h3><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></span>本次决策要回答的问题</h3>
+          <ul class="chk">
+            <li>三个备选业务中，<b>把 260 万项目资金和 30 人投向哪一个</b>？</li>
+            <li>核心业务确定后，<b>如何分阶段投入、设置什么达标门槛</b>？</li>
+            <li>主要风险是什么，<b>如何用机制和预算对冲</b>？</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="fl"><span class="dot"></span>粒刻校园生活服务有限公司</span><span>01 / BACKGROUND</span></div>
+</section>
+
+<!-- ========== 03 决策三要素 ========== -->
+<section class="slide">
+  <div class="pad">
+    <div class="sh">
+      <span class="kidx">02 / DECISION</span>
+      <h2>决策界定：类型 · 目标 · 内容</h2>
+      <p>先想清楚"这是一个什么决策、要达成什么、包含哪些内容"，再进入环境分析</p>
+    </div>
+    <div class="dtypes">
+      <div class="dt"><div class="dk">TYPE 01 · 按重要性</div><h4>战略决策</h4><p>确定公司<b>未来三年核心业务方向</b>，关系全局资源投向与长期竞争力</p></div>
+      <div class="dt"><div class="dk">TYPE 02 · 按重复性</div><h4>非程序化决策</h4><p>首次进入健康餐饮赛道，<b>无先例可循</b>，需专门立项分析论证</p></div>
+      <div class="dt"><div class="dk">TYPE 03 · 按条件确定性</div><h4>风险型决策</h4><p>需求量与收益可预估（首年 800 万），但<b>食品安全、竞争等结果存在不确定性</b></p></div>
+    </div>
+    <div class="bcard" style="padding:16px 22px">
+      <h3><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="#fff"/></svg></span>决策目标（SMART 量化）</h3>
+      <div class="kpis" style="grid-template-columns:repeat(3,1fr);box-shadow:none">
+        <div class="kpi"><div class="kn">1200<small> 万元</small></div><div class="kl">第三年营业收入目标</div></div>
+        <div class="kpi"><div class="kn">2<small> 年内</small></div><div class="kl">第二年经营性现金流转正</div></div>
+        <div class="kpi"><div class="kn">≥85<small> %</small></div><div class="kl">用户满意度持续保持</div></div>
+      </div>
+    </div>
+    <div class="bcard" style="padding:14px 22px;margin-top:14px">
+      <h3><span class="ic cy"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></span>决策内容（5W2H 拆解）</h3>
+      <div class="wrow">
+        <div class="wcell"><b>做什么</b>三选一聚焦健康餐饮</div>
+        <div class="wcell"><b>谁来做</b>30 人项目组 + 12 人后台</div>
+        <div class="wcell"><b>投多少</b>260 万项目资金上限</div>
+        <div class="wcell"><b>何时做</b>6 个月完成试点验证</div>
+        <div class="wcell"><b>怎么做</b>先试点、达标后再扩张</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="fl"><span class="dot"></span>粒刻校园生活服务有限公司</span><span>02 / DECISION</span></div>
+</section>
+
+<!-- ========== 04 PEST ========== -->
+<section class="slide">
+  <div class="pad">
+    <div class="sh">
+      <span class="kidx">03 / PEST ANALYSIS</span>
+      <h2>宏观环境分析：PEST</h2>
+      <p>健康餐饮配送赛道的宏观环境整体向好，政策合规是首要前提</p>
+    </div>
+    <div class="pest">
+      <div class="pcol">
+        <div class="ph"><span class="pl2">P</span><div><h3>政治 / 政策</h3><div class="pe">Political</div></div></div>
+        <ul>
+          <li><b>"健康中国 2030"</b>战略倡导合理膳食，健康餐受政策鼓励</li>
+          <li>高校后勤社会化改革，<b>校园服务向市场化主体开放</b></li>
+          <li>《食品安全法》监管趋严，校园食品<b>主体责任压实</b></li>
+          <li>无生产资质 → 必须选择<b>持证供应商合作</b>的合规路径</li>
+        </ul>
+      </div>
+      <div class="pcol">
+        <div class="ph"><span class="pl2">E</span><div><h3>经济环境</h3><div class="pe">Economic</div></div></div>
+        <ul>
+          <li>高校生均月消费持续提升，<b>15–25 元健康餐客单价可接受</b></li>
+          <li>单校万人级稳定客群，<b>需求高频、可预测、现金流好</b></li>
+          <li>食材与人力成本上行，需靠<b>集中配送摊薄履约成本</b></li>
+          <li>资金仅 320 万，重资产模式不可行，<b>轻资产是必然选择</b></li>
+        </ul>
+      </div>
+      <div class="pcol">
+        <div class="ph"><span class="pl2">S</span><div><h3>社会文化</h3><div class="pe">Social</div></div></div>
+        <ul>
+          <li>大学生健康意识觉醒，<b>健身、减脂、控糖人群快速扩大</b></li>
+          <li>外卖订餐习惯已完全养成，<b>线上订餐渗透率极高</b></li>
+          <li>对食堂"重油重盐、排队久"的不满形成<b>结构性需求缺口</b></li>
+          <li>校园社群传播快，<b>口碑裂变获客成本低</b></li>
+        </ul>
+      </div>
+      <div class="pcol">
+        <div class="ph"><span class="pl2">T</span><div><h3>技术环境</h3><div class="pe">Technological</div></div></div>
+        <ul>
+          <li><b>现有订单系统可直接复用</b>，省去核心系统开发成本</li>
+          <li>智能取餐柜 / 取餐点技术成熟，<b>错峰取餐缓解高峰压力</b></li>
+          <li>历史订单数据可做<b>销量预测与精准备餐</b>，降低损耗</li>
+          <li>溯源与温控技术成熟，<b>食品安全可数字化管控</b></li>
+        </ul>
+      </div>
+    </div>
+    <div class="pconcl">结论：宏观环境<b>总体有利</b> —— 政策鼓励 + 需求真实 + 技术就绪；前提是走<b>"持证供应商 + 轻资产配送"</b>的合规轻模式。</div>
+  </div>
+  <div class="foot"><span class="fl"><span class="dot"></span>粒刻校园生活服务有限公司</span><span>03 / PEST</span></div>
+</section>
+
+<!-- ========== 05 五力模型 ========== -->
+<section class="slide">
+  <div class="pad">
+    <div class="sh">
+      <span class="kidx">04 / FIVE FORCES</span>
+      <h2>行业环境分析：波特五力模型</h2>
+      <p>校园健康餐饮配送的竞争结构 —— 威胁主要在替代品与买方，需差异化应对</p>
+    </div>
+    <div class="ff">
+      <div class="ffc">
+        <div class="fh"><h3>潜在进入者威胁</h3><span class="lvl m">中</span></div>
+        <p>进入门槛中等：需要资质合作方 + 校内配送网络，<b>纯外卖平台缺乏校内场景资源</b>，新玩家短期难以复制取餐点网络。</p>
+      </div>
+      <div class="ffc center">
+        <div class="fh"><h3>现有竞争者的竞争</h3><span class="lvl h">高</span></div>
+        <p>校园食堂 + 美团 / 饿了么等外卖平台双面夹击，竞争最激烈。但<b>"健康餐"细分赛道供给稀缺</b> —— 食堂不做、外卖不健康，聚焦细分可避开正面价格战。</p>
+      </div>
+      <div class="ffc">
+        <div class="fh"><h3>供应商议价能力</h3><span class="lvl m">中</span></div>
+        <p>我方无生产资质，<b>依赖持证餐饮供应商，议价地位偏弱</b>；以"多供应商备选 + 稳定订单量"换取议价空间与食安承诺。</p>
+      </div>
+      <div class="ffc">
+        <div class="fh"><h3>替代品威胁</h3><span class="lvl h">高</span></div>
+        <p>食堂、便利店便当、自炊均可替代，其中<b>食堂价格优势明显</b>；须以营养搭配、口味与便利性构建差异化价值。</p>
+      </div>
+      <div class="ffc">
+        <div class="fh"><h3>购买者议价能力</h3><span class="lvl h">高</span></div>
+        <p>学生价格敏感、转换成本低；但<b>套餐会员制 + 复购权益</b>可锁定粘性，目标复购率 ≥35% 即为对冲手段。</p>
+      </div>
+    </div>
+    <div class="fconcl">结论：行业吸引力<b>中等偏上</b> —— 不宜打价格战，应采取<b>差异化（健康细分）+ 场景壁垒（校内取餐点）+ 会员粘性</b>的竞争策略。</div>
+  </div>
+  <div class="foot"><span class="fl"><span class="dot"></span>粒刻校园生活服务有限公司</span><span>04 / FIVE FORCES</span></div>
+</section>
+
+<!-- ========== 06 SWOT ========== -->
+<section class="slide">
+  <div class="pad">
+    <div class="sh">
+      <span class="kidx">05 / SWOT ANALYSIS</span>
+      <h2>内外部综合研判：SWOT</h2>
+      <p>优势集中在"校内运营 + 系统 + 配送"，短板集中在"资质 + 门店 + 资金规模"</p>
+    </div>
+    <div class="sw">
+      <div class="swc s">
+        <div class="sh2"><span class="sl">S</span><div><h3>优势</h3><div class="se">Strengths</div></div></div>
+        <ul>
+          <li><b>校内运营团队</b>现成，贴近学生场景</li>
+          <li><b>订单系统</b>可直接复用，零开发成本</li>
+          <li><b>集中配送经验</b>与高峰调度能力</li>
+          <li>校内渠道与社群资源，<b>获客成本低</b></li>
+        </ul>
+      </div>
+      <div class="swc w">
+        <div class="sh2"><span class="sl">W</span><div><h3>劣势</h3><div class="se">Weaknesses</div></div></div>
+        <ul>
+          <li><b>无食品生产资质</b>，依赖外部供应商</li>
+          <li><b>无大规模实体门店</b>，品牌触点有限</li>
+          <li>资金仅 <b>320 万</b>，难以多线作战</li>
+          <li>品牌知名度低，用户信任需重建</li>
+        </ul>
+      </div>
+      <div class="swc o">
+        <div class="sh2"><span class="sl">O</span><div><h3>机会</h3><div class="se">Opportunities</div></div></div>
+        <ul>
+          <li>校园健康餐<b>需求快速增长</b>、供给稀缺</li>
+          <li>高校后勤开放，<b>校企合作空间扩大</b></li>
+          <li>政策鼓励健康饮食与光盘行动</li>
+          <li>数字化工具降低<b>备餐损耗与履约成本</b></li>
+        </ul>
+      </div>
+      <div class="swc t">
+        <div class="sh2"><span class="sl">T</span><div><h3>威胁</h3><div class="se">Threats</div></div></div>
+        <ul>
+          <li><b>食品安全</b>监管与舆情风险（一票否决）</li>
+          <li>外卖巨头下沉、<b>食堂低价竞争</b></li>
+          <li>配送<b>高峰履约压力</b>集中爆发</li>
+          <li>原材料价格波动侵蚀毛利</li>
+        </ul>
+      </div>
+    </div>
+    <div class="sstr">
+      <div class="sst"><span class="k">SO</span><b>增长型：</b>用现成系统+配送快速切入健康餐细分</div>
+      <div class="sst"><span class="k">WO</span><b>扭转型：</b>与持证供应商战略合作，补齐资质短板</div>
+      <div class="sst"><span class="k">ST</span><b>多元型：</b>差异化健康定位，避开与食堂低价正面竞争</div>
+      <div class="sst"><span class="k">WT</span><b>防御型：</b>轻资产 + 试点先行，指标不达标不追加投入</div>
+    </div>
+  </div>
+  <div class="foot"><span class="fl"><span class="dot"></span>粒刻校园生活服务有限公司</span><span>05 / SWOT</span></div>
+</section>
+
+<!-- ========== 07 方案比选 ========== -->
+<section class="slide">
+  <div class="pad">
+    <div class="sh">
+      <span class="kidx">06 / OPTIONS COMPARISON</span>
+      <h2>三备选方案加权评分</h2>
+      <p>基于 PEST · 五力 · SWOT 的分析结论，按四个维度加权打分（5 分制）</p>
+    </div>
+    <div class="cmp">
+      <div class="ctable dim">
+        <div class="crow head">
+          <div>备选方案</div>
+          <div style="text-align:center">市场需求<span class="wn">权重 30%</span></div>
+          <div style="text-align:center">盈利能力<span class="wn">权重 25%</span></div>
+          <div style="text-align:center">资源匹配度<span class="wn">权重 25%</span></div>
+          <div style="text-align:center">风险可控性<span class="wn">权重 20%</span></div>
+          <div style="text-align:center">加权总分</div>
+        </div>
+        <div class="crow win">
+          <div><span class="opn">① 健康餐饮配送<span class="winbadge">✔ 选定</span></span><small>线上订餐 · 集中配送 · 校园取餐点</small></div>
+          <div class="sc">4.5</div><div class="sc">4.0</div><div class="sc">4.5</div><div class="sc">3.5</div>
+          <div class="tot">4.18</div>
+        </div>
+        <div class="crow">
+          <div><span class="opn">② 校园智慧零售</span><small>智能零售柜 · 库存管理与补货</small></div>
+          <div class="sc">3.5</div><div class="sc">3.5</div><div class="sc">3.5</div><div class="sc">4.0</div>
+          <div class="tot">3.60</div>
+        </div>
+        <div class="crow">
+          <div><span class="opn">③ 闲置物品循环</span><small>回收 · 检测维修 · 担保交易</small></div>
+          <div class="sc">3.0</div><div class="sc">2.5</div><div class="sc">3.0</div><div class="sc">3.5</div>
+          <div class="tot">2.98</div>
+        </div>
+      </div>
+      <div class="cnote">评分依据：健康餐饮<b>需求高频刚需、毛利结构清晰</b>，且与"运营人员 + 订单系统 + 配送经验"三大存量能力<b>匹配度最高</b>；智慧零售柜单点投入大、闲置循环频次低且非标，均不及。</div>
+    </div>
+  </div>
+  <div class="foot"><span class="fl"><span class="dot"></span>粒刻校园生活服务有限公司</span><span>06 / OPTIONS</span></div>
+</section>
+
+<!-- ========== 08 最终决策 ========== -->
+<section class="slide">
+  <div class="pad">
+    <div class="sh">
+      <span class="kidx">07 / FINAL DECISION</span>
+      <h2>最终决策：高校健康餐饮订购与配送</h2>
+      <p>市场需求、盈利能力与资源匹配度综合得分最高，与公司现有能力最贴近</p>
+    </div>
+    <div class="dgrid">
+      <div class="decision-hero">
+        <span class="dt2">CORE BUSINESS · NEXT 3 YEARS</span>
+        <h3>把 <span class="hl">260 万项目资金</span> 和 <span class="hl">30 人团队</span><br>集中投向健康餐饮一件事</h3>
+        <p>商业模式：不自建厨房（规避资质短板），与持证餐饮供应商战略合作，粒刻负责线上订餐、集中配送与校园取餐点运营 —— 做"校园健康餐的订购与履约平台"。</p>
+        <div class="dflow"><span>线上订餐</span><i>→</i><span>供应商集中供餐</span><i>→</i><span>校园集中配送</span><i>→</i><span>取餐点自提</span></div>
+      </div>
+      <div class="dside">
+        <div class="dkpi"><div class="dn">260<small> 万元</small></div><div class="dl2"><b>初期投入</b><br>严格控制在预算上限内</div></div>
+        <div class="dkpi"><div class="dn">30<small> 人</small></div><div class="dl2"><b>项目投入人员</b><br>另保留 12 人后台支持</div></div>
+        <div class="dkpi"><div class="dn">800<small> 万元</small></div><div class="dl2"><b>第一年预计收入</b><br>试点达标后逐校复制</div></div>
+        <div class="dkpi"><div class="dn">2.4<small> 年</small></div><div class="dl2"><b>投资回收期</b><br>第二年经营性现金流转正</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="fl"><span class="dot"></span>粒刻校园生活服务有限公司</span><span>07 / DECISION</span></div>
+</section>
+
+<!-- ========== 09 资金与目标 ========== -->
+<section class="slide">
+  <div class="pad">
+    <div class="sh">
+      <span class="kidx">08 / CAPITAL & GOALS</span>
+      <h2>资金安排与三年经营目标</h2>
+      <p>320 万资金的分配逻辑：260 万投入业务验证，60 万留足安全垫</p>
+    </div>
+    <div class="fgrid">
+      <div class="fund">
+        <h3>项目投入 260 万元 · 建议分配</h3>
+        <div class="fs">坚持轻资产：钱主要花在"履约网络 + 食安 + 获客"上，不建厨房、不开大店</div>
+        <div class="alloc">
+          <div class="arow2"><span class="al">取餐点与设备</span><span class="atrack"><span class="afill" data-w="88%"></span></span><span class="av">90 万</span></div>
+          <div class="arow2"><span class="al">订单系统升级</span><span class="atrack"><span class="afill c" data-w="58%"></span></span><span class="av">60 万</span></div>
+          <div class="arow2"><span class="al">市场与品牌获客</span><span class="atrack"><span class="afill g" data-w="49%"></span></span><span class="av">50 万</span></div>
+          <div class="arow2"><span class="al">食安与供应商管理</span><span class="atrack"><span class="afill o" data-w="34%"></span></span><span class="av">35 万</span></div>
+          <div class="arow2"><span class="al">培训与机动预备</span><span class="atrack"><span class="afill r" data-w="24%"></span></span><span class="av">25 万</span></div>
+        </div>
+        <div class="alloc-total"><span>另保留周转资金（安全垫，不投入固定资产）</span><b>60 万元</b></div>
+      </div>
+      <div class="goals">
+        <div class="goal"><span class="gy">YEAR 1</span><div class="gt"><b>营业收入 800 万元 · 跑通单校模型</b><span>2 所试点高校 → 达标后复制扩展，验证"日均 500 份"的单点经济模型</span></div></div>
+        <div class="goal"><span class="gy">YEAR 2</span><div class="gt"><b>经营性现金流转正</b><span>规模效应摊薄配送与获客成本，摆脱对投入资金的依赖</span></div></div>
+        <div class="goal"><span class="gy">YEAR 3</span><div class="gt"><b>营业收入 1200 万元 · 满意度 ≥85%</b><span>成为区域内高校健康餐饮配送的头部校园品牌</span></div></div>
+        <div class="goal" style="border-left:4px solid var(--orange)"><div class="gt" style="position:relative;z-index:1"><b>决策约束红线</b><span>投入不超 260 万预算上限 · 6 个月内必须完成试点验证 · 周转资金 60 万不得挪用</span></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="fl"><span class="dot"></span>粒刻校园生活服务有限公司</span><span>08 / CAPITAL & GOALS</span></div>
+</section>
+
+<!-- ========== 10 实施路线图 ========== -->
+<section class="slide">
+  <div class="pad">
+    <div class="sh">
+      <span class="kidx">09 / ROADMAP</span>
+      <h2>实施计划：三阶段推进路线</h2>
+      <p>先试点验证、指标达标后再投入 —— 每一步扩张都有明确的量化门槛</p>
+    </div>
+    <div class="tl">
+      <div class="tl-track">
+        <div class="phase">
+          <span class="pdot"></span>
+          <span class="pm">第 1 – 2 月</span>
+          <h3>筹备期 · 打基础</h3>
+          <ul>
+            <li><b>筛选持证供应商</b>：资质审核 + 样品盲测 + 多供应商备选</li>
+            <li><b>完善订单系统</b>：套餐预订、取餐点选择、高峰分流</li>
+            <li>组建 30 人项目组，完成食安与配送培训</li>
+            <li>签约首批 2 所试点高校的服务点位</li>
+          </ul>
+        </div>
+        <div class="phase">
+          <span class="pdot"></span>
+          <span class="pm">第 3 – 6 月</span>
+          <h3>试点期 · 验证模型</h3>
+          <ul>
+            <li>在 <b>2 所高校</b>上线健康餐订购配送</li>
+            <li>目标 <b>日均 500 份</b>订单</li>
+            <li>配送<b>准时率 ≥95%</b></li>
+            <li>6 个月约束期内完成试点复盘</li>
+          </ul>
+        </div>
+        <div class="phase">
+          <span class="pdot"></span>
+          <span class="pm">第 7 – 12 月</span>
+          <h3>扩展期 · 达标复制</h3>
+          <ul>
+            <li>用户<b>满意度 ≥85%</b> 方可启动扩张</li>
+            <li><b>复购率 ≥35%</b> 验证用户粘性</li>
+            <li>向更多高校复制单校运营模型</li>
+            <li>全年冲击 <b>800 万</b>收入目标</li>
+          </ul>
+        </div>
+      </div>
+      <div class="gate">
+        <span class="gic"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.4 8.4-8 9-4.6-.6-8-4-8-9V7l8-4z"/><path d="M9 12l2 2 4-4"/></svg></span>
+        <div><b>阶段门机制（Gate）：</b>每一阶段结束复盘核心指标，<b>达标 → 追加投入扩张；不达标 → 复盘修正、暂停扩张</b>，把风险锁死在试点范围内。</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="fl"><span class="dot"></span>粒刻校园生活服务有限公司</span><span>09 / ROADMAP</span></div>
+</section>
+
+<!-- ========== 11 风险与应对 ========== -->
+<section class="slide">
+  <div class="pad">
+    <div class="sh">
+      <span class="kidx">10 / RISK CONTROL</span>
+      <h2>主要风险与应对预案</h2>
+      <p>食品安全是"一票否决"级风险，配送高峰是日常最大运营挑战</p>
+    </div>
+    <div class="risks">
+      <div class="risk">
+        <span class="ric"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.4 8.4-8 9-4.6-.6-8-4-8-9V7l8-4z"/><path d="M12 8v5M12 16.5v.5"/></svg></span>
+        <div>
+          <h3>食品安全风险<span class="rt">最高优先级</span></h3>
+          <p>无生产资质，食安责任链条长，一旦出事品牌归零。</p>
+          <div class="ra"><b>应对：</b>只签<b>持证供应商</b>并收取食安保证金；留样溯源 48 小时；批次抽检 + 食安责任险。</div>
+        </div>
+      </div>
+      <div class="risk">
+        <span class="ric"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></span>
+        <div>
+          <h3>配送高峰履约风险<span class="rt">运营挑战</span></h3>
+          <p>午晚餐时段订单瞬时集中，延误直接拉低满意度。</p>
+          <div class="ra"><b>应对：</b>预售制 + 分时段取餐削峰；取餐点自提分流；弹性排班池，目标准时率 <b>≥95%</b>。</div>
+        </div>
+      </div>
+      <div class="risk">
+        <span class="ric"><svg viewBox="0 0 24 24"><path d="M3 12h4l2.5-6 4 12L16 12h5"/></svg></span>
+        <div>
+          <h3>竞争与替代风险<span class="rt">持续监控</span></h3>
+          <p>食堂低价、外卖平台补贴可能挤压客群。</p>
+          <div class="ra"><b>应对：</b>坚守<b>健康细分差异化</b>不打价格战；会员套餐 + 复购权益锁定粘性（复购率 ≥35%）。</div>
+        </div>
+      </div>
+      <div class="risk">
+        <span class="ric"><svg viewBox="0 0 24 24"><path d="M12 2v20M17 6.5c0-1.9-2.2-3-5-3s-5 1.1-5 3 2 2.7 5 3.2 5 1.3 5 3.3-2.2 3-5 3-5-1.1-5-3"/></svg></span>
+        <div>
+          <h3>资金与现金流风险<span class="rt">预算红线</span></h3>
+          <p>扩张过快可能烧光资金，回收期 2.4 年存在变数。</p>
+          <div class="ra"><b>应对：</b>260 万预算红线 + <b>60 万周转金不动用</b>；阶段门机制，指标不达标坚决不追加投入。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="fl"><span class="dot"></span>粒刻校园生活服务有限公司</span><span>10 / RISK</span></div>
+</section>
+
+<!-- ========== 12 结束页 ========== -->
+<section class="slide s-end">
+  <div class="end-in">
+    <span class="kidx">11 / CONCLUSION</span>
+    <h2>有限资源下，集中力量<br>先把 <span class="hl">健康餐饮</span> 一件事做稳</h2>
+    <p>PEST 看宏观可行、五力看行业可进、SWOT 看能力可配 —— 以 260 万投入、30 人团队、三阶段节奏，用"试点验证、达标扩张"的稳健策略，实现三年 1200 万营收目标。</p>
+    <div class="etags">
+      <span>✔ PEST 宏观分析</span><span>✔ 五力行业扫描</span><span>✔ SWOT 综合研判</span><span>✔ 加权评分决策</span><span>✔ 阶段门实施计划</span>
+    </div>
+    <div class="eteam">感谢聆听 · 敬请指正<br><b>汇报人：李佳彤 · 程静 · 岑哲颖</b>　|　粒刻校园生活服务有限公司</div>
+  </div>
+</section>
+
+</div>
+
+<div id="cnt">01 / 12</div>
+<div id="hint">← → 或空格翻页 · F11 全屏 · Ctrl+P 导出 PDF</div>
+<div id="ctrl">
+  <button id="prev" aria-label="上一页">‹</button>
+  <button id="next" aria-label="下一页">›</button>
+</div>
+
+<script>
+const slides=[...document.querySelectorAll('.slide')];
+let cur=0;
+const cnt=document.getElementById('cnt'),pbar=document.getElementById('pbar'),hint=document.getElementById('hint');
+function show(i){
+  cur=Math.max(0,Math.min(slides.length-1,i));
+  slides.forEach((s,idx)=>s.classList.toggle('active',idx===cur));
+  cnt.textContent=String(cur+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0');
+  pbar.style.width=((cur+1)/slides.length*100)+'%';
+  // 触发当前页进度条动画
+  slides[cur].querySelectorAll('.pfill,.afill').forEach(el=>{
+    const w=el.dataset.w;el.style.width='0';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>el.style.width=w));
+  });
+  if(cur>0&&hint)hint.style.opacity='0';
+}
+document.getElementById('next').onclick=()=>show(cur+1);
+document.getElementById('prev').onclick=()=>show(cur-1);
+addEventListener('keydown',e=>{
+  if(['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)){e.preventDefault();show(cur+1)}
+  if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(cur-1)}
+  if(e.key==='Home')show(0);if(e.key==='End')show(slides.length-1);
+});
+document.getElementById('stage').addEventListener('click',e=>{
+  if(e.target.closest('a,button'))return;
+  const x=e.clientX/innerWidth;show(x>0.5?cur+1:cur-1);
+});
+// 自适应缩放
+const stage=document.getElementById('stage');
+function fit(){
+  const s=Math.min(innerWidth/1330,innerHeight/770);
+  stage.style.transform=`translate(-50%,-50%) scale(${s})`;
+}
+addEventListener('resize',fit);fit();show(0);
+</script>
+</body>
+</html>
